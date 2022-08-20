@@ -7,7 +7,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-20.04
     steps:
       - name: Set environment variables
         shell: bash {0}
@@ -17,10 +17,9 @@ jobs:
         shell: bash {0}
         run: |
           sudo apt update
-          sudo apt install build-essential ccache ecj fastjar file g++ gawk \
-          gettext git java-propose-classpath libelf-dev libncurses5-dev \
-          libncursesw5-dev libssl-dev python python2.7-dev unzip wget \
-          rsync subversion swig time xsltproc zlib1g-dev openjdk-8-jdk
+          sudo apt install  make gcc python gcc-multilib bc lzop sudo m4 zip git \
+          curl openjdk-8-jdk libxml2-utils kmod g++-multilib python3 libncurses5 \
+          rsync
 
           mkdir -p ~/.bin
           PATH="${HOME}/.bin:${PATH}"
@@ -38,7 +37,11 @@ jobs:
           git config --global user.email "${{ secrets.GIT_COMMIT_EMAIL }}"
           git commit -a -m "update to v${{ env.RELEASE_VERSION }}" || true
 
-          cd .. && ./build.sh
+          cd ../docker_builder
+          sudo cp java.security /etc/java-8-openjdk/security/java.security
+
+          export LC_ALL=C && ./build.sh
+
           tar -czf Image-rk3288.tar.gz rockdev/Image-rk3288
       - name: Generate package checksums
         shell: bash {0}
