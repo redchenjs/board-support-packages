@@ -12,7 +12,7 @@ jobs:
       - name: Set environment variables
         shell: bash {0}
         run: |
-          echo "RELEASE_VERSION=14.2.0.23" >> $GITHUB_ENV
+          echo "RELEASE_VERSION=14.4.0.23" >> $GITHUB_ENV
       - name: Compile Android packages
         if: env.LATEST_VERSION == 0
         shell: bash {0}
