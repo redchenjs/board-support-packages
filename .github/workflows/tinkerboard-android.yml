@@ -29,11 +29,12 @@ jobs:
           repo init -u https://github.com/TinkerBoard-Android/manifest.git -b n-mr1-rk3288-tb -m ${{ env.RELEASE_VERSION }}.xml
           repo sync
           ./build.sh
+          tar -czf Image-rk3288.tar.gz rockdev/Image-rk3288
       - name: Generate package checksums
         shell: bash {0}
         run: |
           mkdir artifacts
-          for file in *.img output/*.img; do
+          for file in *.tar.gz; do
             sudo bash -c "sha512sum $file | sed -r 's|([0-9a-z]+).*|\1|g' > $file.sha512sum"
             sudo mv $file* artifacts/
           done
