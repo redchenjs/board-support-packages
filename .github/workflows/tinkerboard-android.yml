@@ -21,14 +21,24 @@ jobs:
           gettext git java-propose-classpath libelf-dev libncurses5-dev \
           libncursesw5-dev libssl-dev python python2.7-dev unzip wget \
           rsync subversion swig time xsltproc zlib1g-dev openjdk-8-jdk
+
           mkdir -p ~/.bin
           PATH="${HOME}/.bin:${PATH}"
           curl https://storage.googleapis.com/git-repo-downloads/repo > ~/.bin/repo
           chmod a+rx ~/.bin/repo
+
           mkdir tinker && cd tinker
           repo init -u https://github.com/TinkerBoard-Android/manifest.git -b n-mr1-rk3288-tb -m ${{ env.RELEASE_VERSION }}.xml
           repo sync
-          ./build.sh
+
+          cp ../patches/kernel/*.patch kernel/
+          cd kernel && git apply *.patch
+
+          git config --global user.name "${{ secrets.GIT_COMMIT_USERNAME }}"
+          git config --global user.email "${{ secrets.GIT_COMMIT_EMAIL }}"
+          git commit -a -m "update to v${{ env.RELEASE_VERSION }}" || true
+
+          cd .. && ./build.sh
           tar -czf Image-rk3288.tar.gz rockdev/Image-rk3288
       - name: Generate package checksums
         shell: bash {0}
