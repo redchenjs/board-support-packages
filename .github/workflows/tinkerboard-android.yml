@@ -43,7 +43,7 @@ jobs:
           export LC_ALL=C
           cd .. && ./build.sh
 
-          tar -czf Image-rk3288.tar.gz rockdev/Image-rk3288
+          tar -czf IMAGE.tar.gz IMAGE/*
       - name: Generate package checksums
         shell: bash {0}
         run: |
