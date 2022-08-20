@@ -40,7 +40,8 @@ jobs:
           cd ../docker_builder
           sudo cp java.security /etc/java-8-openjdk/security/java.security
 
-          export LC_ALL=C && ./build.sh
+          export LC_ALL=C
+          cd .. && ./build.sh
 
           tar -czf Image-rk3288.tar.gz rockdev/Image-rk3288
       - name: Generate package checksums
