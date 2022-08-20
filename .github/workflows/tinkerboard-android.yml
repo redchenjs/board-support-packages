@@ -1,0 +1,54 @@
+name: tinkerboard-android
+
+on:
+  workflow_dispatch:
+  # schedule:
+    # - cron: 00 18 * * *
+
+jobs:
+  build:
+    runs-on: ubuntu-18.04
+    steps:
+      - name: Set environment variables
+        shell: bash {0}
+        run: |
+          echo "RELEASE_VERSION=14.2.0.23" >> $GITHUB_ENV
+      - name: Compile Android packages
+        if: env.LATEST_VERSION == 0
+        shell: bash {0}
+        run: |
+          sudo apt update
+          sudo apt install build-essential ccache ecj fastjar file g++ gawk \
+          gettext git java-propose-classpath libelf-dev libncurses5-dev \
+          libncursesw5-dev libssl-dev python python2.7-dev python3 unzip wget \
+          python3-distutils python3-setuptools rsync subversion swig time \
+          xsltproc zlib1g-dev default-jdk repo
+          mkdir tinker && cd tinker
+          repo init -u https://github.com/TinkerBoard-Android/manifest.git -b n-mr1-rk3288-tb -m ${{ env.RELEASE_VERSION }}.xml
+          repo sync
+          ./build.sh
+      - name: Generate package checksums
+        shell: bash {0}
+        run: |
+          mkdir artifacts
+          for file in *.img output/*.img; do
+            sudo bash -c "sha512sum $file | sed -r 's|([0-9a-z]+).*|\1|g' > $file.sha512sum"
+            sudo mv $file* artifacts/
+          done
+      - name: Create release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: v${{ env.RELEASE_VERSION }}
+          release_name: Release v${{ env.RELEASE_VERSION }}
+          draft: false
+          prerelease: false
+      - name: Upload release assets
+        uses: NBTX/upload-release-assets@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          targets: artifacts/*
