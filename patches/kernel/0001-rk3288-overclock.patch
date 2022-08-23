@@ -1,8 +1,8 @@
 diff --git a/arch/arm/boot/dts/rk3288-android.dtsi b/arch/arm/boot/dts/rk3288-android.dtsi
-index 69136e21144b..c9a354a62be5 100755
+index 69136e21144b..71466f750685 100755
 --- a/arch/arm/boot/dts/rk3288-android.dtsi
 +++ b/arch/arm/boot/dts/rk3288-android.dtsi
-@@ -379,17 +379,63 @@
+@@ -379,17 +372,30 @@
  	clocks = <&cru PLL_APLL>;
  	leakage-scaling-sel = <0   254   25>;
  
@@ -16,70 +16,49 @@ index 69136e21144b..c9a354a62be5 100755
 +	opp@1704000000 {
 +		opp-hz = /bits/ 64 <1704000000>;
 +		opp-microvolt = <1350000>;
++		clock-latency-ns = <40000>;
 +	};
 +	opp@1800000000 {
  		opp-hz = /bits/ 64 <1800000000>;
- 		opp-microvolt = <1400000>;
--		clock-latency-ns = <40000>;
--		status = "okay";
++		opp-microvolt = <1350000>;
++		clock-latency-ns = <40000>;
 +	};
-+	/* boost-only frequencies below */
 +	opp@1896000000 {
 +		opp-hz = /bits/ 64 <1896000000>;
-+		opp-microvolt = <1425000>;
-+	};
-+	opp@1920000000 {
-+		opp-hz = /bits/ 64 <1920000000>;
-+		opp-microvolt = <1425000>;
+ 		opp-microvolt = <1400000>;
+ 		clock-latency-ns = <40000>;
+-		status = "okay";
 +	};
 +	opp@1992000000 {
 +		opp-hz = /bits/ 64 <1992000000>;
-+		opp-microvolt = <1450000>;
-+	};
-+	opp@2016000000 {
-+		opp-hz = /bits/ 64 <2016000000>;
-+		opp-microvolt = <1475000>;
-+		turbo-mode;
-+	};
-+	opp@2040000000 {
-+		opp-hz = /bits/ 64 <2040000000>;
-+		opp-microvolt = <1475000>;
-+	};
-+	opp@2064000000 {
-+		opp-hz = /bits/ 64 <2064000000>;
-+		opp-microvolt = <1475000>;
++		opp-microvolt = <1400000>;
++		clock-latency-ns = <40000>;
 +	};
 +	opp@2088000000 {
 +		opp-hz = /bits/ 64 <2088000000>;
-+		opp-microvolt = <1500000>;
-+	};
-+	opp@2112000000 {
-+		opp-hz = /bits/ 64 <2112000000>;
-+		opp-microvolt = <1500000>;
-+	};
-+	opp@2136000000 {
-+		opp-hz = /bits/ 64 <2136000000>;
-+		opp-microvolt = <1500000>;
-+	};
-+	opp@2160000000 {
-+		opp-hz = /bits/ 64 <2160000000>;
-+		opp-microvolt = <1500000>;
-+	};
-+	opp@2184000000 {
-+		opp-hz = /bits/ 64 <2184000000>;
-+		opp-microvolt = <1500000>;
-+	};
-+	opp@2208000000 {
-+		opp-hz = /bits/ 64 <2208000000>;
-+		opp-microvolt = <1500000>;
++		opp-microvolt = <1450000>;
++		clock-latency-ns = <40000>;
  	};
  };
  
+diff --git a/arch/arm/boot/dts/rk3288-miniarm.dts b/arch/arm/boot/dts/rk3288-miniarm.dts
+index e1737af929a8..447ea1ea3f7e 100755
+--- a/arch/arm/boot/dts/rk3288-miniarm.dts
++++ b/arch/arm/boot/dts/rk3288-miniarm.dts
+@@ -262,7 +262,7 @@
+ 				regulator-always-on;
+ 				regulator-boot-on;
+ 				regulator-min-microvolt = <850000>;
+-				regulator-max-microvolt = <1250000>;
++				regulator-max-microvolt = <1350000>;
+ 				regulator-name = "vdd_gpu";
+ 				regulator-ramp-delay = <6000>;
+ 				regulator-state-mem {
 diff --git a/arch/arm/boot/dts/rk3288.dtsi b/arch/arm/boot/dts/rk3288.dtsi
-index a1c79221af39..30fba824a699 100644
+index a1c79221af39..6c4756b3c0f5 100644
 --- a/arch/arm/boot/dts/rk3288.dtsi
 +++ b/arch/arm/boot/dts/rk3288.dtsi
-@@ -1686,6 +1686,10 @@
+@@ -1686,10 +1686,22 @@
  			opp-hz = /bits/ 64 <400000000>;
  			opp-microvolt = <1100000>;
  		};
@@ -90,17 +69,38 @@ index a1c79221af39..30fba824a699 100644
  		opp-600000000 {
  			opp-hz = /bits/ 64 <600000000>;
  			opp-microvolt = <1250000>;
+ 		};
++		opp-700000000 {
++			opp-hz = /bits/ 64 <700000000>;
++			opp-microvolt = <1300000>;
++		};
++		opp-800000000 {
++			opp-hz = /bits/ 64 <800000000>;
++			opp-microvolt = <1350000>;
++		};
+ 	};
+ 
+ 	noc: syscon@ffac0000 {
 diff --git a/drivers/clk/rockchip/clk-rk3288.c b/drivers/clk/rockchip/clk-rk3288.c
-index 531ac1c4a98a..593e316eb3e5 100644
+index 531ac1c4a98a..e4645b784afc 100644
 --- a/drivers/clk/rockchip/clk-rk3288.c
 +++ b/drivers/clk/rockchip/clk-rk3288.c
+@@ -182,7 +182,7 @@ static struct rockchip_pll_rate_table rk3288_npll_rates[] = {
+ 
+ #define RK3288_CPUCLK_RATE(_prate, _core_m0, _core_mp, _l2ram, _atclk, _pdbg) \
+ 	{								\
+-		.prate = _prate,					\
++		.prate = _prate##U,					\
+ 		.divs = {						\
+ 			RK3288_CLKSEL0(_core_m0, _core_mp),		\
+ 			RK3288_CLKSEL37(_l2ram, _atclk, _pdbg),		\
 @@ -190,6 +190,23 @@ static struct rockchip_pll_rate_table rk3288_npll_rates[] = {
  	}
  
  static struct rockchip_cpuclk_rate_table rk3288_cpuclk_rates[] __initdata = {
-+	RK3288_CPUCLK_RATE(2208000000U, 1, 3, 1, 3, 3),
-+	RK3288_CPUCLK_RATE(2184000000U, 1, 3, 1, 3, 3),
-+	RK3288_CPUCLK_RATE(2160000000U, 1, 3, 1, 3, 3),
++	RK3288_CPUCLK_RATE(2208000000, 1, 3, 1, 3, 3),
++	RK3288_CPUCLK_RATE(2184000000, 1, 3, 1, 3, 3),
++	RK3288_CPUCLK_RATE(2160000000, 1, 3, 1, 3, 3),
 +	RK3288_CPUCLK_RATE(2136000000, 1, 3, 1, 3, 3),
 +	RK3288_CPUCLK_RATE(2112000000, 1, 3, 1, 3, 3),
 +	RK3288_CPUCLK_RATE(2088000000, 1, 3, 1, 3, 3),
@@ -118,3 +118,6 @@ index 531ac1c4a98a..593e316eb3e5 100644
  	RK3288_CPUCLK_RATE(1800000000, 1, 3, 1, 3, 3),
  	RK3288_CPUCLK_RATE(1704000000, 1, 3, 1, 3, 3),
  	RK3288_CPUCLK_RATE(1608000000, 1, 3, 1, 3, 3),
+-- 
+2.37.2
+
